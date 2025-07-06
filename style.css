@@ -116,3 +116,47 @@ td input.edit-input {
     border: 1px solid #007bff;
     border-radius: 4px;
 }
+
+
+/* Styles pour les contrôles globaux du tableau */
+#table-controls {
+    margin-bottom: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+#table-controls button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    background-color: #6c757d; /* Gris secondaire */
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+#table-controls button:hover {
+    background-color: #5a6268;
+}
+
+/* Styles pour l'édition des en-têtes */
+th .header-edit-input {
+    width: calc(100% - 35px); /* Laisse de la place pour le bouton supprimer */
+    padding: 8px;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+}
+
+.delete-col-btn {
+    background-color: #dc3545; /* Rouge */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 5px;
+    float: right;
+}
