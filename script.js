@@ -63,8 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const actionTd = document.createElement('td');
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
-        editButton.classList.add('edit-btn');
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.classList.add('delete-btn');
         actionTd.appendChild(editButton);
+        actionTd.appendChild(deleteButton);
         newTr.appendChild(actionTd);
 
         // 2. Ajouter la nouvelle ligne au corps du tableau
@@ -86,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {HTMLTableRowElement} row - La ligne (tr) à modifier.
      */
     function toggleRowEditState(row) {
-        const button = row.querySelector('button');
+        const button = row.querySelector('button.edit-btn, button.save-btn');
         const isSaving = button.classList.contains('save-btn');
         
         // Sélectionne toutes les cellules de données (toutes sauf la dernière avec le bouton)
@@ -195,10 +198,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Gère les clics sur les boutons "Edit", "Save" dans le corps du tableau
  
     tableBody.addEventListener('click', (event) => {
-        const button = event.target.closest('button.edit-btn, button.save-btn');
-        if (button) {
-            const row = button.closest('tr');
+        const target = event.target;
+        const row = target.closest('tr');
+
+        if (target.closest('button.edit-btn, button.save-btn')) {
             toggleRowEditState(row);
+        } else if (target.closest('button.delete-btn')) {
+            // Demande de confirmation avant de supprimer
+            if (confirm('Êtes-vous sûr de vouloir supprimer cette ligne ?')) {
+                row.remove();
+                // Optionnel : vous pourriez ici appeler une fonction pour sauvegarder l'état du tableau
+            }
         }
     });  
 

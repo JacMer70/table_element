@@ -81,7 +81,7 @@ tfoot td {
 }
 
 /* Styles pour les boutons d'action */
-.edit-btn, .save-btn {
+.edit-btn, .save-btn, .delete-btn {
     padding: 6px 12px;
     border: none;
     border-radius: 4px;
@@ -90,6 +90,15 @@ tfoot td {
     font-size: 0.9rem;
     transition: background-color 0.2s;
     min-width: 60px;
+}
+
+.delete-btn {
+    background-color: #dc3545; /* Rouge */
+    margin-left: 5px;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
 }
 
 .edit-btn {
