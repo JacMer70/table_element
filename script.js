@@ -2,7 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sélectionne tous les champs de saisie pour le filtrage
     const filterInputs = document.querySelectorAll('.filter-input');
     // Sélectionne toutes les lignes (tr) dans le corps du tableau
-    const tableRows = document.querySelectorAll('#data-table tbody tr');
+    let tableRows = document.querySelectorAll('#data-table tbody tr'); // On utilise 'let' car la liste des lignes va changer
+
 
     /**
      * Fonction pour filtrer le tableau en fonction des valeurs des champs de saisie.
@@ -37,6 +38,56 @@ document.addEventListener('DOMContentLoaded', () => {
     // Ajoute un écouteur d'événement 'input' à chaque champ de filtre.
     filterInputs.forEach(input => {
         input.addEventListener('input', filterTable);
+    });
+    
+    // --- GESTION DE L'AJOUT D'UNE NOUVELLE LIGNE ---
+
+    const addRowElement = document.getElementById('add-row');
+    const addInputs = addRowElement.querySelectorAll('.add-input');
+    const tableBody = document.querySelector('#data-table tbody');
+
+    /**
+     * Crée et ajoute une nouvelle ligne au tableau à partir des données saisies.
+     */
+    function addNewRow() {
+        const values = Array.from(addInputs).map(input => input.value.trim());
+
+        // On vérifie si au moins un champ a été rempli pour éviter d'ajouter des lignes vides.
+        const isRowEmpty = values.every(value => value === '');
+        if (isRowEmpty) {
+            return; // Si tous les champs sont vides, on ne fait rien.
+        }
+
+        // 1. Créer la nouvelle ligne (tr) et ses cellules (td)
+        const newTr = document.createElement('tr');
+        values.forEach(value => {
+            const newTd = document.createElement('td');
+            newTd.textContent = value;
+            newTr.appendChild(newTd);
+        });
+
+        // 2. Ajouter la nouvelle ligne au corps du tableau
+        tableBody.appendChild(newTr);
+
+        // 3. Mettre à jour la liste des lignes pour que le filtre s'applique aux nouvelles données
+        tableRows = document.querySelectorAll('#data-table tbody tr');
+
+        // 4. Vider les champs de saisie de la ligne d'ajout
+        addInputs.forEach(input => (input.value = ''));
+
+        // 5. Appliquer les filtres actuels pour voir si la nouvelle ligne doit être affichée
+        filterTable();
+
+        // 6. Remettre le focus sur le premier champ pour une saisie rapide
+        addInputs[0].focus();
+    }
+
+    // Écouteur d'événement pour la touche "Entrée" sur la ligne d'ajout
+    addRowElement.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Empêche le comportement par défaut (ex: soumission de formulaire)
+            addNewRow();
+        }
     });
 });
 

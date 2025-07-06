@@ -53,3 +53,29 @@ tbody tr:hover {
     background-color: #f1f1f1;
 }
 
+
+/* Styles pour la ligne d'ajout */
+tfoot {
+    background-color: #f8f9fa;
+}
+
+tfoot td {
+    padding: 8px;
+    border: 1px solid #ddd;
+}
+
+.add-input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    font-style: italic;
+}
+
+.add-input:focus {
+    outline: none;
+    border-color: #007bff;
+    font-style: normal;
+}
