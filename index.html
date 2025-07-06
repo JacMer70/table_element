@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feuille de Données avec Filtres</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>Feuille de Données</h1>
+    <p>Saisissez du texte dans les champs sous les en-têtes pour filtrer les données en temps réel.</p>
+
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>Prénom</th>
+                <th>Nom</th>
+                <th>Ville</th>
+                <th>Pays</th>
+            </tr>
+            <tr class="filter-row">
+                <th><input type="text" class="filter-input" placeholder="Filtrer par prénom..."></th>
+                <th><input type="text" class="filter-input" placeholder="Filtrer par nom..."></th>
+                <th><input type="text" class="filter-input" placeholder="Filtrer par ville..."></th>
+                <th><input type="text" class="filter-input" placeholder="Filtrer par pays..."></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Jean</td>
+                <td>Dupont</td>
+                <td>Paris</td>
+                <td>France</td>
+            </tr>
+            <tr>
+                <td>Marie</td>
+                <td>Curie</td>
+                <td>Paris</td>
+                <td>France</td>
+            </tr>
+            <tr>
+                <td>John</td>
+                <td>Doe</td>
+                <td>New York</td>
+                <td>USA</td>
+            </tr>
+            <tr>
+                <td>Jane</td>
+                <td>Smith</td>
+                <td>Londres</td>
+                <td>Royaume-Uni</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
