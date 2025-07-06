@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Crée et ajoute une nouvelle ligne au tableau à partir des données saisies.
      */
-    function addNewRow() {
+   function addNewRow() { // MODIFIÉE pour ajouter le bouton Edit
         const values = Array.from(addInputs).map(input => input.value.trim());
 
         // On vérifie si au moins un champ a été rempli pour éviter d'ajouter des lignes vides.
@@ -65,6 +65,13 @@ document.addEventListener('DOMContentLoaded', () => {
             newTd.textContent = value;
             newTr.appendChild(newTd);
         });
+        // Ajouter la cellule d'action avec le bouton
+        const actionTd = document.createElement('td');
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.classList.add('edit-btn');
+        actionTd.appendChild(editButton);
+        newTr.appendChild(actionTd);
 
         // 2. Ajouter la nouvelle ligne au corps du tableau
         tableBody.appendChild(newTr);
@@ -89,5 +96,53 @@ document.addEventListener('DOMContentLoaded', () => {
             addNewRow();
         }
     });
+
+    // --- GESTION DE L'ÉDITION DES LIGNES ---
+
+    /**
+     * Gère le passage entre le mode affichage et le mode édition pour une ligne.
+     * @param {HTMLTableRowElement} row - La ligne (tr) à modifier.
+     */
+    function toggleRowEditState(row) {
+        const button = row.querySelector('button');
+        const isSaving = button.classList.contains('save-btn');
+        
+        // Sélectionne toutes les cellules de données (toutes sauf la dernière avec le bouton)
+        const dataCells = Array.from(row.children).slice(0, -1);
+
+        if (isSaving) {
+            // Mode "Sauvegarder" : on enregistre les données et on repasse en mode affichage.
+            dataCells.forEach(cell => {
+                const input = cell.querySelector('input.edit-input');
+                if (input) {
+                    cell.textContent = input.value; // Remplace l'input par sa valeur texte
+                }
+            });
+            button.textContent = 'Edit';
+            button.classList.replace('save-btn', 'edit-btn');
+        } else {
+            // Mode "Édition" : on transforme le texte en champs de saisie.
+            dataCells.forEach(cell => {
+                const currentValue = cell.textContent;
+                // Remplace le contenu de la cellule par un input contenant la valeur actuelle
+                cell.innerHTML = `<input type="text" class="edit-input" value="${currentValue.replace(/"/g, '&quot;')}">`;
+            });
+            button.textContent = 'Save';
+            button.classList.replace('edit-btn', 'save-btn');
+            // Met le focus sur le premier champ de la ligne
+            if (row.querySelector('input.edit-input')) {
+                row.querySelector('input.edit-input').focus();
+            }
+        }
+    }
+
+    // Utilise la délégation d'événements sur le corps du tableau pour gérer tous les clics
+    tableBody.addEventListener('click', (event) => {
+        const button = event.target.closest('button.edit-btn, button.save-btn');
+        if (button) {
+            const row = button.closest('tr');
+            toggleRowEditState(row);
+        }
+    });  
 });
 

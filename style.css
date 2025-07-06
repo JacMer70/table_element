@@ -79,3 +79,40 @@ tfoot td {
     border-color: #007bff;
     font-style: normal;
 }
+
+/* Styles pour les boutons d'action */
+.edit-btn, .save-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+    min-width: 60px;
+}
+
+.edit-btn {
+    background-color: #28a745; /* Vert */
+}
+
+.edit-btn:hover {
+    background-color: #218838;
+}
+
+.save-btn {
+    background-color: #007bff; /* Bleu */
+}
+
+.save-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Style pour les inputs lors de l'édition d'une ligne */
+td input.edit-input {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+}
