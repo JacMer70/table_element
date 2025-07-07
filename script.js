@@ -5,7 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableBody = table.querySelector('tbody');
     const addRowElement = document.getElementById('add-row');
     const tableControls = document.getElementById('table-controls');
-
+    // État pour suivre le tri actuel
+    let sortState = {
+        columnIndex: -1,
+        direction: 'asc'
+    };
 
     /**
      * Filtre le tableau en fonction des valeurs des champs de saisie.
@@ -150,6 +154,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 row.insertBefore(newCell, row.lastElementChild);
             }
         });
+
+        // Rend la nouvelle colonne triable
+        tableHead.querySelectorAll('tr:first-child th').forEach(th => {
+            if (!th.classList.contains('sortable')) initializeSortForHeader(th);
+
+        });
     }
 
     /**
@@ -165,7 +175,63 @@ document.addEventListener('DOMContentLoaded', () => {
                     row.children[colIndex].remove();
                 }
             });
+            // Réinitialiser l'état du tri car les index ont changé
+            sortState = { columnIndex: -1, direction: 'asc' };
+            updateSortIndicators();            
         }
+    }
+
+    /**
+     * Trie le tableau en fonction d'une colonne.
+     * @param {number} columnIndex - L'index de la colonne à trier.
+     */
+    function sortTableByColumn(columnIndex) {
+        const currentDirection = sortState.columnIndex === columnIndex ? (sortState.direction === 'asc' ? 'desc' : 'asc') : 'asc';
+        sortState = { columnIndex, direction: currentDirection };
+
+        const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+        const sortedRows = rows.sort((a, b) => {
+            const cellA = a.children[columnIndex]?.textContent.trim() || '';
+            const cellB = b.children[columnIndex]?.textContent.trim() || '';
+
+            const isNumeric = !isNaN(parseFloat(cellA)) && isFinite(cellA) && !isNaN(parseFloat(cellB)) && isFinite(cellB);
+
+            let comparison = 0;
+            if (isNumeric) {
+                comparison = parseFloat(cellA) - parseFloat(cellB);
+            } else {
+                comparison = cellA.localeCompare(cellB, undefined, { sensitivity: 'base' });
+            }
+
+            return comparison * (currentDirection === 'asc' ? 1 : -1);
+        });
+
+        tableBody.innerHTML = '';
+        sortedRows.forEach(row => tableBody.appendChild(row));
+
+        updateSortIndicators();
+    }
+
+    /** Met à jour les classes CSS sur les en-têtes pour montrer l'état du tri. */
+    function updateSortIndicators() {
+        tableHead.querySelectorAll('tr:first-child th').forEach((th, index) => {
+            th.classList.remove('sorted-asc', 'sorted-desc');
+            if (index === sortState.columnIndex) {
+                th.classList.add(sortState.direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
+            }
+        });
+    }
+
+    /** Ajoute les éléments nécessaires pour le tri à une cellule d'en-tête. */
+    function initializeSortForHeader(th) {
+        if (th.textContent.trim() === 'Actions' || th.querySelector('.sort-icons')) return;
+
+        th.classList.add('sortable');
+        const iconContainer = document.createElement('span');
+        iconContainer.classList.add('sort-icons');
+        iconContainer.innerHTML = `<span class="sort-asc">▲</span><span class="sort-desc">▼</span>`;
+        th.appendChild(iconContainer);
     }
 
     /**
@@ -212,17 +278,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });  
 
-    // Gère la saisie dans les filtres et la suppression de colonnes dans l'en-tête
+    // Gère la saisie dans les filtres
     tableHead.addEventListener('input', event => {
         if (event.target.classList.contains('filter-input')) {
             filterTable();
         }
     });
+
+
+    // Gère les clics sur les en-têtes (tri et suppression de colonne)
     tableHead.addEventListener('click', event => {
+        // Gère la suppression de colonne (uniquement en mode édition)
         if (event.target.classList.contains('delete-col-btn')) {
             deleteColumn(event.target);
+            return; // Action exclusive
         }
-    });
+
+        // Gère le tri (uniquement si pas en mode édition)
+        const toggleBtn = document.getElementById('toggle-headers-btn');
+        if (toggleBtn.textContent !== 'Sauvegarder les en-têtes') {
+            const headerCell = event.target.closest('th.sortable');
+            if (headerCell) {
+                const colIndex = Array.from(headerCell.parentElement.children).indexOf(headerCell);
+                sortTableByColumn(colIndex);
+            }
+        }
+    });        
 
     // Gère l'ajout de ligne avec la touche "Entrée"
     addRowElement.addEventListener('keydown', (event) => {
@@ -239,6 +320,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (button.id === 'add-col-btn') addColumn();
         if (button.id === 'toggle-headers-btn') toggleHeaderEditState(button);
-    });    
+    }); 
+    // Initialisation du tri sur les en-têtes existants
+    tableHead.querySelectorAll('tr:first-child th').forEach(th => initializeSortForHeader(th));
 });
 

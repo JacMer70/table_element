@@ -169,3 +169,40 @@ th .header-edit-input {
     margin-left: 5px;
     float: right;
 }
+
+
+/* Styles pour le tri */
+thead th.sortable {
+    cursor: pointer;
+    position: relative;
+    padding-right: 25px; /* Espace pour les icônes */
+}
+
+.sort-icons {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    opacity: 0.4;
+    color: #fff;
+}
+
+.sort-icons .sort-asc,
+.sort-icons .sort-desc {
+    font-size: 12px;
+    line-height: 0.8;
+}
+
+th.sortable:hover .sort-icons,
+th.sorted-asc .sort-icons,
+th.sorted-desc .sort-icons {
+    opacity: 1;
+}
+
+th.sorted-asc .sort-asc,
+th.sorted-desc .sort-desc {
+    color: #ffc107; /* Jaune pour indiquer le tri actif */
+}
+
