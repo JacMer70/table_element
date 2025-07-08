@@ -170,8 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function deleteColumn(deleteButton) {
         const headerCell = deleteButton.closest('th');
         const colIndex = Array.from(headerCell.parentElement.children).indexOf(headerCell);
+        const cleanHeaderText = getCleanHeaderText(headerCell);
 
-        if (colIndex > -1 && confirm(`Êtes-vous sûr de vouloir supprimer la colonne "${headerCell.textContent.trim()}" ?`)) {
+        if (colIndex > -1 && confirm(`Êtes-vous sûr de vouloir supprimer la colonne "${cleanHeaderText}" ?`)) {
             table.querySelectorAll('tr').forEach(row => {
                 if (row.children[colIndex]) {
                     row.children[colIndex].remove();
@@ -249,16 +250,29 @@ document.addEventListener('DOMContentLoaded', () => {
             // Mode "Sauvegarder"
             headerCells.forEach(cell => {
                 const input = cell.querySelector('input.header-edit-input');
-                cell.textContent = input.value; // Le bouton de suppression est automatiquement retiré avec innerHTML
+                const newHeaderText = input.value;
+                const sortIcons = cell.querySelector('.sort-icons');
+
+                // Vider la cellule et reconstruire avec le texte et les icônes
+                cell.innerHTML = '';
+                cell.appendChild(document.createTextNode(newHeaderText));
+                if (sortIcons) {
+                    cell.appendChild(sortIcons);
+                }
             });
             button.textContent = 'Éditer les en-têtes';
             saveState(); // Sauvegarder l'état        
         } else {
             // Mode "Édition"
             headerCells.forEach(cell => {
-                const currentValue = cell.textContent;
+                const currentValue = getCleanHeaderText(cell);
+                const sortIcons = cell.querySelector('.sort-icons');
+
                 cell.innerHTML = `<input type="text" class="header-edit-input" value="${currentValue.replace(/"/g, '&quot;')}">
                                   <button class="delete-col-btn" title="Supprimer la colonne">X</button>`;
+                if (sortIcons) {
+                    cell.appendChild(sortIcons);
+                }
             });
             button.textContent = 'Sauvegarder les en-têtes';
         }
@@ -326,18 +340,29 @@ document.addEventListener('DOMContentLoaded', () => {
         if (button.id === 'add-col-btn') addColumn();
         if (button.id === 'toggle-headers-btn') toggleHeaderEditState(button);
     }); 
-
+    
     // --- GESTION DE LA PERSISTANCE DES DONNÉES ---
+
+    /**
+     * Gets the clean text content of a header cell, excluding sort icons.
+     * @param {HTMLTableCellElement} th The header cell element.
+     * @returns {string} The clean text content.
+     */
+    function getCleanHeaderText(th) {
+        const input = th.querySelector('.header-edit-input');
+        if (input) return input.value;
+
+        const thClone = th.cloneNode(true);
+        const sortIconsEl = thClone.querySelector('.sort-icons');
+        if (sortIconsEl) sortIconsEl.remove();
+        return thClone.textContent.trim();
+    }
 
     /**
      * Sauvegarde l'état actuel du tableau (en-têtes et données) dans le localStorage.
      */
     function saveState() {
-        const currentHeaders = Array.from(tableHead.querySelectorAll('tr:first-child th:not(:last-child)'))
-                                    .map(th => {
-                                        const input = th.querySelector('.header-edit-input');
-                                        return input ? input.value : th.textContent.trim();
-                                    });
+        const currentHeaders = Array.from(tableHead.querySelectorAll('tr:first-child th:not(:last-child)')).map(getCleanHeaderText);
 
         const currentData = Array.from(tableBody.querySelectorAll('tr')).map(row => {
             const rowData = {};
@@ -409,4 +434,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialisation du tri sur les en-têtes existants
     tableHead.querySelectorAll('tr:first-child th').forEach(th => initializeSortForHeader(th));
 });
-
