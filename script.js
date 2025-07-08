@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 6. Remettre le focus sur le premier champ pour une saisie rapide
         addInputs[0].focus();
+        saveState(); // Sauvegarder l'état
     }
 
     /**
@@ -109,6 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             button.textContent = 'Edit';
             button.classList.replace('save-btn', 'edit-btn');
+            saveState(); // Sauvegarder l'état
         } else {
             // Mode "Édition" : on transforme le texte en champs de saisie.
             dataCells.forEach(cell => {
@@ -177,7 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             // Réinitialiser l'état du tri car les index ont changé
             sortState = { columnIndex: -1, direction: 'asc' };
-            updateSortIndicators();            
+            updateSortIndicators();
+            saveState(); // Sauvegarder l'état
         }
     }
 
@@ -211,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sortedRows.forEach(row => tableBody.appendChild(row));
 
         updateSortIndicators();
+        saveState(); // Sauvegarder l'état
     }
 
     /** Met à jour les classes CSS sur les en-têtes pour montrer l'état du tri. */
@@ -248,6 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 cell.textContent = input.value; // Le bouton de suppression est automatiquement retiré avec innerHTML
             });
             button.textContent = 'Éditer les en-têtes';
+            saveState(); // Sauvegarder l'état        
         } else {
             // Mode "Édition"
             headerCells.forEach(cell => {
@@ -273,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Demande de confirmation avant de supprimer
             if (confirm('Êtes-vous sûr de vouloir supprimer cette ligne ?')) {
                 row.remove();
-                // Optionnel : vous pourriez ici appeler une fonction pour sauvegarder l'état du tableau
+                saveState(); // Sauvegarder l'état
             }
         }
     });  
@@ -321,6 +326,86 @@ document.addEventListener('DOMContentLoaded', () => {
         if (button.id === 'add-col-btn') addColumn();
         if (button.id === 'toggle-headers-btn') toggleHeaderEditState(button);
     }); 
+
+    // --- GESTION DE LA PERSISTANCE DES DONNÉES ---
+
+    /**
+     * Sauvegarde l'état actuel du tableau (en-têtes et données) dans le localStorage.
+     */
+    function saveState() {
+        const currentHeaders = Array.from(tableHead.querySelectorAll('tr:first-child th:not(:last-child)'))
+                                    .map(th => {
+                                        const input = th.querySelector('.header-edit-input');
+                                        return input ? input.value : th.textContent.trim();
+                                    });
+
+        const currentData = Array.from(tableBody.querySelectorAll('tr')).map(row => {
+            const rowData = {};
+            Array.from(row.children).slice(0, -1).forEach((cell, index) => {
+                const input = cell.querySelector('input.edit-input');
+                rowData[currentHeaders[index]] = input ? input.value : cell.textContent.trim();
+            });
+            return rowData;
+        });
+
+        const state = {
+            headers: currentHeaders,
+            data: currentData
+        };
+
+        localStorage.setItem('dataTableState', JSON.stringify(state));
+    }
+
+    /**
+     * Charge l'état du tableau depuis le localStorage au chargement de la page.
+     */
+    function loadState() {
+        const savedStateJSON = localStorage.getItem('dataTableState');
+        if (!savedStateJSON) return;
+
+        try {
+            const state = JSON.parse(savedStateJSON);
+            if (!state.headers || !state.data) return;
+
+            // Vider le contenu actuel pour le reconstruire
+            tableHead.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            // Reconstruire les en-têtes et la ligne de filtre
+            const headerRow = document.createElement('tr');
+            const filterRow = document.createElement('tr');
+            filterRow.className = 'filter-row';
+
+            state.headers.forEach(headerText => {
+                headerRow.innerHTML += `<th>${headerText}</th>`;
+                filterRow.innerHTML += `<th><input type="text" class="filter-input" placeholder="Filtrer par ${headerText}..."></th>`;
+            });
+            headerRow.innerHTML += '<th>Actions</th>';
+            filterRow.innerHTML += '<th></th>';
+            tableHead.appendChild(headerRow);
+            tableHead.appendChild(filterRow);
+
+            // Reconstruire le corps du tableau
+            state.data.forEach(rowData => {
+                const tr = document.createElement('tr');
+                let cellsHtml = '';
+                state.headers.forEach(header => {
+                    cellsHtml += `<td>${rowData[header] || ''}</td>`;
+                });
+                cellsHtml += `<td><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></td>`;
+                tr.innerHTML = cellsHtml;
+                tableBody.appendChild(tr);
+            });
+
+        } catch (e) {
+            console.error("Erreur lors du chargement de l'état du tableau :", e);
+            localStorage.removeItem('dataTableState'); // Supprimer l'état corrompu
+        }
+    }
+
+    // Charger l'état au démarrage
+    loadState();   
+
     // Initialisation du tri sur les en-têtes existants
     tableHead.querySelectorAll('tr:first-child th').forEach(th => initializeSortForHeader(th));
 });
